@@ -1,5 +1,5 @@
 const Manga = require('../models/manga')
-const DetailManga = require('../models/detailManga')
+// const DetailManga = require('../models/detailManga')
 const ChapterList = require('../models/chapter')
 const slugify = require('slugify')
 const User = require("../models/user");
@@ -7,7 +7,7 @@ const User = require("../models/user");
 
 module.exports = {
     mangaList: (req, res) => {
-        Manga.find((err, manga) => {
+        Manga.find({}, 'slug main_image title description rating',(err, manga) => {
             if (err) console.error(err)
             if (manga.length > 0) {
                 res.json({
@@ -43,14 +43,51 @@ module.exports = {
     },
 
     findBySlug: (req, res) => {
-        DetailManga.findOne({slug: req.params.slug},(err, users) => {
+        Manga.findOne({slug: req.params.slug},(err, manga) => {
             if (err) console.error(err)
-            if (users) {
-            console.log(users)
+            if (manga) {
                 res.json({
                     successCode: 'SUC-0001',
                     message: 'Successfully Get Data Users',
-                    data: users
+                    data: manga
+                })
+            } else {
+                res.json({
+                    error_code: 'ERR-0001',
+                    message: 'No Detail Manga found'
+                })
+            }
+        })
+    },
+
+    updateManga: (req, res) => {
+        const id = req.params.id
+        Manga.findByIdAndUpdate(id, req.body, {options: {new: true}}, (err, manga) => {
+            if (err) console.error(err)
+            if (manga) {
+                res.json({
+                    successCode: 'SUC-0001',
+                    message: 'Successfully Update Manga',
+                    data: manga
+                })
+            } else {
+                res.json({
+                    error_code: 'ERR-0001',
+                    message: 'No Detail Manga found'
+                })
+            }
+        })
+    },
+
+    updateChapter: (req, res) => {
+        const id = req.params.id
+        ChapterList.findByIdAndUpdate(id, req.body, {options: {new: true}}, (err, manga) => {
+            if (err) console.error(err)
+            if (manga) {
+                res.json({
+                    successCode: 'SUC-0001',
+                    message: 'Successfully Update Chapter Data Manga',
+                    data: manga
                 })
             } else {
                 res.json({
@@ -83,9 +120,18 @@ module.exports = {
         const slugifyResult = slugify(req.body.title)
         Manga.create({
             title: req.body.title,
-            image: req.body.image,
             rating: req.body.rating,
-            slug: slugifyResult
+            slug: slugifyResult,
+            main_image: req.body.main_image,
+            subTitle: req.body.subTitle,
+            description: req.body.description,
+            subject: req.body.subject,
+            image: req.body.image,
+            type: req.body.type,
+            category: req.body.category,
+            author: req.body.author,
+            totalReader: req.body.totalReader,
+            howToRead: req.body.howToRead,
         }, (err, manga) => {
             if (err) console.error(err)
             res.send({
@@ -111,27 +157,27 @@ module.exports = {
         })
     },
 
-    createDetails: (req, res) => {
-        const slugifyResult = slugify(req.body.title)
-        DetailManga.create({
-            title: req.body.title,
-            subTitle: req.body.subTitle,
-            description: req.body.description,
-            subject: req.body.subject,
-            image: req.body.image,
-            type: req.body.type,
-            category: [req.body.category],
-            author: req.body.author,
-            totalReader: req.body.totalReader,
-            howToRead: req.body.howToRead,
-            slug: slugifyResult
-        }, (err, manga) => {
-            if (err) console.error(err)
-            res.send({
-                successCode: 'SUC-0001',
-                message: 'Successfully Created Manga',
-                data: manga
-            })
-        })
-    }
+    // createDetails: (req, res) => {
+    //     const slugifyResult = slugify(req.body.title)
+    //     DetailManga.create({
+    //         title: req.body.title,
+    //         subTitle: req.body.subTitle,
+    //         description: req.body.description,
+    //         subject: req.body.subject,
+    //         image: req.body.image,
+    //         type: req.body.type,
+    //         category: [req.body.category],
+    //         author: req.body.author,
+    //         totalReader: req.body.totalReader,
+    //         howToRead: req.body.howToRead,
+    //         slug: slugifyResult
+    //     }, (err, manga) => {
+    //         if (err) console.error(err)
+    //         res.send({
+    //             successCode: 'SUC-0001',
+    //             message: 'Successfully Created Manga',
+    //             data: manga
+    //         })
+    //     })
+    // }
 }
